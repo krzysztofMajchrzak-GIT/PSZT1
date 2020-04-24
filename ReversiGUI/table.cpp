@@ -109,10 +109,6 @@ void Table::makeProposalForPawn(Position pawnPos, int directionX, int directionY
 
 bool Table::makeMove(Position pawnPos)
 {
-    if(!canMove)
-    {
-        return false;
-    }
     //DC pawnPos if computer
     if(player[whoseMove] == Player::computer)
     {
@@ -135,6 +131,10 @@ void Table::makeAIMove(Position pawnPos)
 
 void Table::makeMovePlayer(Position pawnPos)
 {
+	if (!canMove)
+	{
+		return;
+	}
     if(table[pawnPos.getX()][pawnPos.getY()] == proposal)
     {
         table[pawnPos.getX()][pawnPos.getY()] = static_cast<pawn>(whoseMove);

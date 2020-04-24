@@ -1,6 +1,8 @@
 #include "AI.h"
 #include <vector>
-
+#include <wx/bmpbuttn.h>
+#include <wx/artprov.h>
+#include "wx/wx.h"
 AI::AI()
 {
 }

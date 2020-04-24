@@ -216,10 +216,7 @@ void cMain::makeProposalForPawn(Position pawnPos, int directionX, int directionY
 
 bool cMain::makeMove(Position pawnPos) // Funkcja Czara z Table
 {
-	if (!canMove)
-	{
-		return false;
-	}
+
 	//DC pawnPos if computer
 	if (player[whoseMove] == Player::computer)
 	{
@@ -237,6 +234,10 @@ bool cMain::makeMove(Position pawnPos) // Funkcja Czara z Table
 
 void cMain::makeMovePlayer(Position pawnPos) // Funkcja Czara z Table
 {
+	if (!canMove)
+	{
+		return;
+	}
 	/*Czêsc odpowiedzialna za wyswietlanie bierek*/
 	wxInitAllImageHandlers();
 	wxImage pustePole(wxT("pustePole.png"), wxBITMAP_TYPE_PNG);
@@ -482,17 +483,31 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 
 			recordTable->makeProposalFor();
 			makeProposalFor();
-
 			blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
 			whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
 
 			recordTable->checkWinCondition();
 			checkWinCondition();
-			
-			if (player[whoseMove] == Player::computer)
+
+			if (!(canMove == 0))
 			{
-				CallAfter(&cMain::makeComputerMove);
+
+					if (player[whoseMove] == Player::computer)
+					{
+						CallAfter(&cMain::makeComputerMove);
+					}
 			}
+			else
+			{
+				recordTable->nextPlayer();
+				nextPlayer();
+
+				recordTable->makeProposalFor();
+				makeProposalFor();
+			}
+			
+
+			
 		}
 	}
 	else if(!evt.GetId() == 5)
@@ -528,7 +543,6 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 			{
 				btn[x][y]->SetBitmapLabel(bierkaC);
 				table[x][y] = black;
-				//btn[y, x]->Enable(false); // zamiast tego bedziemy programowac konkretna funkcjonalnosc
 			}
 			else
 				table[x][y] = none;
@@ -563,25 +577,38 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 
 void cMain::makeComputerMove()
 {
-	wxWindow::Refresh();
+	while (true)
+	{
+		wxWindow::Refresh();
 
-	wxYield();
-	Sleep(500);
-	makeMove(Position(-1, -1));
-	recordTable->makeMove(Position(-1, -1));
+		wxYield();
+		Sleep(500);
+		makeMove(Position(-1, -1));
+		recordTable->makeMove(Position(-1, -1));
 
-	recordTable->nextPlayer();
-	nextPlayer();
+		recordTable->nextPlayer();
+		nextPlayer();
 
-	recordTable->makeProposalFor();
-	makeProposalFor();
+		recordTable->makeProposalFor();
+		makeProposalFor();
+		blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
+		whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
 
+		recordTable->checkWinCondition();
+		checkWinCondition();
 
-	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
-	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+		if (canMove != 0)
+		{
+			break;
+		}
 
-	recordTable->checkWinCondition();
-	checkWinCondition();
+		recordTable->nextPlayer();
+		nextPlayer();
+
+		recordTable->makeProposalFor();
+		makeProposalFor();
+	}
+	
 }
 
 
