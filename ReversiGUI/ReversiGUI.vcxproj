@@ -19,18 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI.h" />
     <ClInclude Include="cApp.h" />
     <ClInclude Include="cMain.h" />
     <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.h" />
-    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="table.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AI.cpp" />
     <ClCompile Include="cApp.cpp" />
     <ClCompile Include="cMain.cpp" />
     <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.cpp" />
-    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.cpp" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="table.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

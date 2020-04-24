@@ -5,6 +5,7 @@
 
 #include "position.h"
 #include "player.h"
+#include <vector>
 
 #define DEBUG
 #ifdef DEBUG
@@ -28,13 +29,20 @@ public:
     void nextPlayer();
     void makeProposalFor();
     bool makeMove(Position pawnPos);
+    void makeAIMove(Position pawnPos);
     void updateScore();
     void checkWinCondition();
-    #ifdef DEBUG
+    int retScoreDiff();
+    bool canPlayerMove();
+    std::vector<Position> makeAllPossibleMoves();
+#ifdef DEBUG
     void printTable();
-    #endif //DEBUG
+#endif //DEBUG
+	int getMaxDepth();
+	void incrementMaxDepth();
 
 private:
+	int maxDepth;
     Player player[2];
     pawn table[TABLE_SIZE][TABLE_SIZE];
     color whoWin;
@@ -46,6 +54,8 @@ private:
     void changePawnColor(Position pawnPos);
     void changePawnInDirection(Position pawnPos, int directionX, int directionY);
     pawn opposite();
+    int getP1Score();
+    int getP2Score();
 
 };
 

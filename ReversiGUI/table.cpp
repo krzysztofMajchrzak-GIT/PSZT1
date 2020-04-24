@@ -1,4 +1,5 @@
 #include "table.h"
+#include "AI.h"
 
 #define DEBUG
 
@@ -18,6 +19,7 @@ Table::Table()
     canMove = 0;
     whoseMove = whitePlayer;
     gameOver = false;
+	maxDepth = 1;
 }
 
 Table::~Table()
@@ -98,7 +100,7 @@ void Table::makeProposalForPawn(Position pawnPos, int directionX, int directionY
             break;
         }
     }
-    if(table[pawnPos.getX()][pawnPos.getY()] == none)
+    if(table[pawnPos.getX()][pawnPos.getY()] == none  && !pawnPos.outOfBorder(TABLE_SIZE))
     {
         table[pawnPos.getX()][pawnPos.getY()] = proposal;
         ++canMove;
@@ -114,7 +116,8 @@ bool Table::makeMove(Position pawnPos)
     //DC pawnPos if computer
     if(player[whoseMove] == Player::computer)
     {
-        //TODO
+        AI ai;
+        makeMovePlayer(ai.makeMove(*this));
     }
     else
     {
@@ -122,6 +125,12 @@ bool Table::makeMove(Position pawnPos)
     }
     updateScore();
     return true;
+}
+
+void Table::makeAIMove(Position pawnPos)
+{
+    makeMovePlayer(pawnPos);
+    updateScore();
 }
 
 void Table::makeMovePlayer(Position pawnPos)
@@ -200,11 +209,51 @@ Table::pawn Table::opposite()
 
 void Table::checkWinCondition()
 {
-    if(player[0].getScore() == 0 || player[1].getScore() == 0 || canMove == 0 || player[0].getScore() + player[1].getScore() == TABLE_SIZE * TABLE_SIZE)
+    if(player[0].getScore() == 0 || player[1].getScore() == 0 || player[0].getScore() + player[1].getScore() == TABLE_SIZE * TABLE_SIZE)
     {
         gameOver = true;
     }
 
+}
+
+std::vector<Position> Table::makeAllPossibleMoves()
+{
+    std::vector<Position> temp;
+    for (int i = 0; i < TABLE_SIZE; ++i)
+    {
+        for (int j = 0; j < TABLE_SIZE; ++j)
+        {
+            if (table[i][j] == proposal)
+            {
+                temp.push_back(Position(i, j));
+            }
+        }
+    }
+    return temp;
+}
+
+int Table::getP1Score()
+{
+
+    return player[0].getScore();
+}
+int Table::getP2Score()
+{
+    return player[1].getScore();
+}
+
+int Table::retScoreDiff()
+{
+    if (static_cast<int>(whoseMove) == 0)
+    {
+        return getP1Score() - getP2Score();
+    }
+    return getP2Score() - getP1Score();
+}
+
+bool Table::canPlayerMove()
+{
+    return static_cast<bool>(canMove);
 }
 
 
@@ -218,5 +267,17 @@ void Table::printTable()
         }
         std::cout<<std::endl;
     }
+}
+int Table::getMaxDepth()
+{
+	return maxDepth;
+}
+
+void Table::incrementMaxDepth()
+{
+	if (maxDepth == 5)
+		maxDepth = 1;
+	else
+		maxDepth++;
 }
 

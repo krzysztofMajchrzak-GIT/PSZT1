@@ -24,6 +24,7 @@ public:
 	wxButton *whiteCounterButton; // Pole liczace punkty gracza bialego
 	wxButton *reset; // Przycisk resettujacy gre
 	wxButton *end; // Przycisk wylaczajacy gre
+	wxButton *incrementMaxDepth;
 	wxGridSizer *grid;
 	wxButton *playerChoiceButton;
 	wxButton *ComputerChoiceButton;
@@ -37,6 +38,8 @@ public:
 
 	void OnButtonClicked(wxCommandEvent &evt); // Nasz event system
 	void resetGame(); // Metoda resetujaca gre
+	Player::who nextplayer(); // Metoda zwracajaca czy nastepnym graczem jest komputer czy gracz
+	void makeComputerMove();
 	wxDECLARE_EVENT_TABLE(); // Inicjalizacja tabeli eventow
 
 	// Czêœæ od CZARA z table przelozona na cMain

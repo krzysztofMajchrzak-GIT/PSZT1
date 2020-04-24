@@ -4,6 +4,7 @@
 #include "player.h"
 #include "position.h"
 #include "table.h"
+#include "AI.h"
 
 int isThisChoice = 0;
 
@@ -13,7 +14,7 @@ wxEND_EVENT_TABLE()
 
 cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(700, 700))
 {
-	
+
 	/*Czêsc odpowiedzialna za wyswietlanie bierek*/
 	wxInitAllImageHandlers();
 	wxImage pustePole(wxT("pustePole.png"), wxBITMAP_TYPE_PNG);
@@ -61,7 +62,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	reset->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	end->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	
-	for (int i = 0; i < 2; i++) // tutaj robie separatory na dole
+	for (int i = 0; i < 1; i++) // tutaj robie separatory na dole
 	{
 		wxButton *separator = new wxButton(this, wxID_ANY, "");
 		separator->SetBackgroundColour("Grey");
@@ -77,6 +78,12 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	playerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	ComputerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	/* Dodane na potrzebe wyboru playera */
+
+	/*Tworzymy tutaj przycisk do inkrementacji glebokosci*/
+	incrementMaxDepth = new wxButton(this, 5, std::to_string(recordTable->getMaxDepth()));
+	grid->Add(incrementMaxDepth, 1, wxEXPAND | wxALL);
+	incrementMaxDepth->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
+	/*Koniec tworzenia przycisk do inkrementacji glebokosci*/
 	
 	whiteCounterButton = new wxButton(this, wxID_ANY, std::to_string(whiteCounter));
 	whiteCounterButton->SetBackgroundColour("White");
@@ -87,8 +94,8 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	blackCounterButton->SetForegroundColour("White");
 	blackCounterButton->Enable(false);
 
-	grid->Add(whiteCounterButton, 2, wxEXPAND | wxALL);
-	grid->Add(blackCounterButton, 2, wxEXPAND | wxALL);
+	grid->Add(whiteCounterButton, 1, wxEXPAND | wxALL);
+	grid->Add(blackCounterButton, 1, wxEXPAND | wxALL);
 
 	/*Koniec sekcji na przyciski z do³u*/
 	
@@ -192,7 +199,7 @@ void cMain::makeProposalForPawn(Position pawnPos, int directionX, int directionY
 			break;
 		}
 	}
-	if (table[pawnPos.getX()][pawnPos.getY()] == none)
+	if (table[pawnPos.getX()][pawnPos.getY()] == none && !pawnPos.outOfBorder(TABLE_SIZE))
 	{
 		table[pawnPos.getX()][pawnPos.getY()] = proposal;
 		if (static_cast<pawn>(whoseMove) == white)
@@ -217,7 +224,9 @@ bool cMain::makeMove(Position pawnPos) // Funkcja Czara z Table
 	//DC pawnPos if computer
 	if (player[whoseMove] == Player::computer)
 	{
-		//TODO
+		//std::cout<<"XDDD"<<std::endl;
+		AI ai;
+		makeMovePlayer(ai.makeMove(*recordTable));
 	}
 	else
 	{
@@ -335,7 +344,7 @@ cMain::pawn cMain::opposite() // Funkcja Czara z Table
 
 void cMain::checkWinCondition() // Funkcja Czara z Table
 {
-	if (player[0].getScore() == 0 || player[1].getScore() == 0 || canMove == 0 || player[0].getScore() + player[1].getScore() == TABLE_SIZE * TABLE_SIZE)
+	if (player[0].getScore() == 0 || player[1].getScore() == 0 || player[0].getScore() + player[1].getScore() == TABLE_SIZE * TABLE_SIZE)
 	{
 		
 		if (player[0].getScore() > player[1].getScore())
@@ -352,6 +361,24 @@ void cMain::checkWinCondition() // Funkcja Czara z Table
 
 }
 
+Player::who cMain::nextplayer()
+{
+	if (whoseMove == white)
+	{
+		if (player[black] == Player::computer)
+			return Player::computer;
+		else
+			return Player::player;
+	}
+	else if (whoseMove == black)
+	{
+		if (player[white] == Player::computer)
+			return Player::computer;
+		else
+			return Player::player;
+	}
+}
+
 void cMain::OnButtonClicked(wxCommandEvent &evt)
 {
 	
@@ -366,10 +393,18 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 		resetGame();
 	}
 
+	if (evt.GetId() == 5) // Inkrementujemy glebokosc
+	{
+		recordTable->incrementMaxDepth();
+		incrementMaxDepth->SetLabel(std::to_string(recordTable->getMaxDepth()));
+	}
+
 	if (player[whoseMove] == Player::computer) // Tutaj bo zresetowac i wylaczyc mozemy zawsze
 	{
 		return;
 	}
+	
+
 
 	else if ((evt.GetId() == 3 || evt.GetId() == 4) && (isThisChoice == 0 || isThisChoice == 1))
 	{
@@ -418,9 +453,16 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 			recordTable->makeProposalFor();
 			makeProposalFor();
 			
+			if (player[whoseMove] == Player::computer) // Jesli zaczyna komputer
+			{
+				makeComputerMove();
+			}
+
+			
 		}
 		
 	}
+
 
 	else if(isThisChoice > 1) // Tutaj normalna gra
 	{
@@ -444,14 +486,21 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 
 			recordTable->checkWinCondition();
 			checkWinCondition();
+			
+			if (player[whoseMove] == Player::computer)
+			{
+				CallAfter(&cMain::makeComputerMove);
+			}
 		}
 	}
-	else
+	else if(!evt.GetId() == 5)
 	{
 		wxMessageBox("You have to choose the player");
 	}
 	
 	evt.Skip();
+	
+	
 }
 
 
@@ -485,6 +534,8 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 			else
 				table[x][y] = none;
 		}
+	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
+	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
 	playerChoiceButton->Enable(true);
 	playerChoiceButton->SetBackgroundColour("Default");
 	playerChoiceButton->SetLabel("Player");
@@ -497,5 +548,29 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 	delete recordTable;
 	recordTable = new Table; // Tworzymy nowa tablice
 }
+
+void cMain::makeComputerMove()
+{
+	wxWindow::Refresh();
+
+	wxYield();
+	Sleep(500);
+	makeMove(Position(-1, -1));
+	recordTable->makeMove(Position(-1, -1));
+
+	recordTable->nextPlayer();
+	nextPlayer();
+
+	recordTable->makeProposalFor();
+	makeProposalFor();
+
+
+	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
+	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+
+	recordTable->checkWinCondition();
+	checkWinCondition();
+}
+
 
 
