@@ -14,6 +14,7 @@ public:
 	void scoreClear();
 	Player & operator ++();
 	int getScore();
+	who getPlayerType();
 private:
 	int score;
 	who playerType;

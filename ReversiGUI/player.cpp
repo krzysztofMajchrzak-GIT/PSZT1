@@ -49,3 +49,8 @@ int Player::getScore()
 {
 	return score;
 }
+
+Player::who Player::getPlayerType()
+{
+	return playerType;
+}

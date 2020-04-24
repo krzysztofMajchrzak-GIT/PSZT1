@@ -21,10 +21,13 @@
     <ClInclude Include="cMain.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\player.h">
+    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.h">
+    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +38,13 @@
     <ClCompile Include="cMain.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\player.cpp">
+    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.cpp">
+    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,9 +3,9 @@
 #include <wx/artprov.h>
 #include "player.h"
 #include "position.h"
+#include "table.h"
 
-
-
+int isThisChoice = 0;
 
 wxBEGIN_EVENT_TABLE(cMain, wxFrame)
 	EVT_BUTTON(10001, OnButtonClicked)
@@ -13,6 +13,7 @@ wxEND_EVENT_TABLE()
 
 cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(700, 700))
 {
+	
 	/*Czêsc odpowiedzialna za wyswietlanie bierek*/
 	wxInitAllImageHandlers();
 	wxImage pustePole(wxT("pustePole.png"), wxBITMAP_TYPE_PNG);
@@ -22,6 +23,8 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	/*Czêsc odpowiedzialna za wyswietlanie bierek*/
 
 	grid = new wxGridSizer(nFieldWidth + 1, nFieldHeight, 5, 5);
+
+	recordTable = new Table; // Tworzymy nasza instancje
 
 	for(int x = 0; x < nFieldWidth; x++)
 		for (int y = 0; y < nFieldHeight; y++)
@@ -58,7 +61,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	reset->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	end->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	
-	for (int i = 0; i < 4; i++) // tutaj robie separatory na dole
+	for (int i = 0; i < 2; i++) // tutaj robie separatory na dole
 	{
 		wxButton *separator = new wxButton(this, wxID_ANY, "");
 		separator->SetBackgroundColour("Grey");
@@ -66,6 +69,14 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 		grid->Add(separator, 1, wxEXPAND | wxALL);
 
 	}
+	/* Dodane na potrzebe wyboru playera */
+	playerChoiceButton = new wxButton(this, 3, "Player");
+	ComputerChoiceButton = new wxButton(this, 4, "Computer");
+	grid->Add(playerChoiceButton, 1, wxEXPAND | wxALL);
+	grid->Add(ComputerChoiceButton, 1, wxEXPAND | wxALL);
+	playerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
+	ComputerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
+	/* Dodane na potrzebe wyboru playera */
 	
 	whiteCounterButton = new wxButton(this, wxID_ANY, std::to_string(whiteCounter));
 	whiteCounterButton->SetBackgroundColour("White");
@@ -83,17 +94,7 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	
 	this->SetSizer(grid);
 	grid->Layout();
-	
-	// Czêœæ odpowiedzialna za pocz¹tkowe uruchomienie gry
-
-	getStartConfig(Player::player, Player::player);
-	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
-	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
-	nextPlayer();
-	makeProposalFor();
-
 }
-
 
 cMain::~cMain()
 {
@@ -353,6 +354,8 @@ void cMain::checkWinCondition() // Funkcja Czara z Table
 
 void cMain::OnButtonClicked(wxCommandEvent &evt)
 {
+	
+	
 
 	if (evt.GetId() == 1) // Kliknelismy przycisk end
 	{
@@ -363,7 +366,63 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 		resetGame();
 	}
 
-	else // Tutaj normalna gra
+	if (player[whoseMove] == Player::computer) // Tutaj bo zresetowac i wylaczyc mozemy zawsze
+	{
+		return;
+	}
+
+	else if ((evt.GetId() == 3 || evt.GetId() == 4) && (isThisChoice == 0 || isThisChoice == 1))
+	{
+		if (isThisChoice == 0)
+		{
+			if (evt.GetId() == 3) // Wybraliœmy Playera
+			{
+				tempPlayer[0] = Player::player;
+			}
+			else // Wybraliœmy komputer
+				tempPlayer[0] = Player::computer;
+
+			isThisChoice++;
+		}
+		else
+		{
+			if (evt.GetId() == 3) // Wybraliœmy Playera
+			{
+				tempPlayer[1] = Player::player;
+			}
+			else // Wybraliœmy komputer
+				tempPlayer[1] = Player::computer;
+
+			isThisChoice++;
+			
+			/*Ogarnaimy przyciski*/
+			playerChoiceButton->Enable(false);
+			playerChoiceButton->SetBackgroundColour("Grey");
+			playerChoiceButton->SetLabel("");
+			ComputerChoiceButton->Enable(false);
+			ComputerChoiceButton->SetBackgroundColour("Grey");
+			ComputerChoiceButton->SetLabel("");
+
+			/*Zaczynamy gre*/
+
+			// Czêœæ odpowiedzialna za pocz¹tkowe uruchomienie gry
+
+			getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
+			recordTable->getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
+
+
+			blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
+			whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+			//nextPlayer();
+
+			recordTable->makeProposalFor();
+			makeProposalFor();
+			
+		}
+		
+	}
+
+	else if(isThisChoice > 1) // Tutaj normalna gra
 	{
 		int x = (evt.GetId() - 10000) % nFieldWidth; // Pobieram wspolrzedna x kliknietego przycisku
 		int y = (evt.GetId() - 10000) / nFieldWidth; // pobieram wspolrzedna y kliknietego przycisku
@@ -371,16 +430,30 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 		{
 			//Wszystkie elementy skopiowane z twojej petli while
 			makeMove(Position(x, y));
+			recordTable->makeMove(Position(x, y));
+
+			recordTable->nextPlayer();
 			nextPlayer();
+
+			recordTable->makeProposalFor();
 			makeProposalFor();
+
+
 			blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
 			whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+
+			recordTable->checkWinCondition();
 			checkWinCondition();
 		}
+	}
+	else
+	{
+		wxMessageBox("You have to choose the player");
 	}
 	
 	evt.Skip();
 }
+
 
 void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowego
 {
@@ -412,13 +485,17 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 			else
 				table[x][y] = none;
 		}
+	playerChoiceButton->Enable(true);
+	playerChoiceButton->SetBackgroundColour("Default");
+	playerChoiceButton->SetLabel("Player");
+	ComputerChoiceButton->Enable(true);
+	ComputerChoiceButton->SetBackgroundColour("Default");
+	ComputerChoiceButton->SetLabel("Computer");
+	isThisChoice = 0;
 	/*Pierwsze wywolanie przy poczatkowym ustawieniu*/
-	getStartConfig(Player::player, Player::player);
-	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
-	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
-	nextPlayer();
-	makeProposalFor();
-	/*Pierwsze wywolanie przy poczatkowym ustawieniu*/
+	whoseMove = whitePlayer;
+	delete recordTable;
+	recordTable = new Table; // Tworzymy nowa tablice
 }
 
 

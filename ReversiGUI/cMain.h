@@ -3,6 +3,7 @@
 #include "wx/wx.h"
 #include "player.h"
 #include "position.h"
+#include "table.h"
 
 #define TABLE_SIZE 8
 #include <iostream>
@@ -24,6 +25,10 @@ public:
 	wxButton *reset; // Przycisk resettujacy gre
 	wxButton *end; // Przycisk wylaczajacy gre
 	wxGridSizer *grid;
+	wxButton *playerChoiceButton;
+	wxButton *ComputerChoiceButton;
+	Table *recordTable; // Twoja tablica do sledzenia rozgrywki
+	Player tempPlayer[2]; // Pomocniczy Player do poczatkowej konfiguracji
 
 	
 	enum pawn { white, black, proposal, none };

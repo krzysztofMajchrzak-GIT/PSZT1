@@ -21,14 +21,16 @@
   <ItemGroup>
     <ClInclude Include="cApp.h" />
     <ClInclude Include="cMain.h" />
-    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\player.h" />
     <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.h" />
+    <ClInclude Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.h" />
+    <ClInclude Include="player.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cApp.cpp" />
     <ClCompile Include="cMain.cpp" />
-    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\player.cpp" />
     <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\position.cpp" />
+    <ClCompile Include="D:\Czaro\Combat_exxe\PSZT1-master\PSZT1\table.cpp" />
+    <ClCompile Include="player.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
