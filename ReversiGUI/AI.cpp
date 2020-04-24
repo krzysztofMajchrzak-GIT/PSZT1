@@ -54,7 +54,7 @@ int AI::minMaxAB(Table &t, int depth, bool isMax, int alpha, int beta)
             newTable.makeAIMove(p);
             newTable.nextPlayer();
             newTable.makeProposalFor();
-            score = minMaxAB(newTable, depth-1, !isMax, INT_MIN, INT_MAX);
+            score = minMaxAB(newTable, depth-1, !isMax, alpha, beta);
             if(score > best)
             {
                 best = score;
@@ -79,7 +79,7 @@ int AI::minMaxAB(Table &t, int depth, bool isMax, int alpha, int beta)
             newTable.makeAIMove(p);
             newTable.nextPlayer();
             newTable.makeProposalFor();
-            score = minMaxAB(newTable, depth-1, isMax, INT_MIN, INT_MAX);
+            score = minMaxAB(newTable, depth-1, isMax, alpha, beta);
             if(score < best)
             {
                 best = score;

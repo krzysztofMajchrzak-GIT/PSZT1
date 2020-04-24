@@ -28,6 +28,7 @@ public:
 	wxGridSizer *grid;
 	wxButton *playerChoiceButton;
 	wxButton *ComputerChoiceButton;
+	wxButton *pvp; // Player vs Player
 	Table *recordTable; // Twoja tablica do sledzenia rozgrywki
 	Player tempPlayer[2]; // Pomocniczy Player do poczatkowej konfiguracji
 
@@ -52,7 +53,7 @@ public:
 	void updateScore();
 	void checkWinCondition();
 
-public:
+private:
 	Player player[2];
 	pawn table[TABLE_SIZE][TABLE_SIZE];
 	color whoWin;

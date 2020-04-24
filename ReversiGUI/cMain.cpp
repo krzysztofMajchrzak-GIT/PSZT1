@@ -62,21 +62,20 @@ cMain::cMain() : wxFrame(nullptr, wxID_ANY, "REVERSI", wxPoint(30,30), wxSize(70
 	reset->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	end->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	
-	for (int i = 0; i < 1; i++) // tutaj robie separatory na dole
-	{
-		wxButton *separator = new wxButton(this, wxID_ANY, "");
-		separator->SetBackgroundColour("Grey");
-		separator->Enable(false);
-		grid->Add(separator, 1, wxEXPAND | wxALL);
-
-	}
+	
 	/* Dodane na potrzebe wyboru playera */
 	playerChoiceButton = new wxButton(this, 3, "Player");
 	ComputerChoiceButton = new wxButton(this, 4, "Computer");
+	pvp = new wxButton(this, 6, "PVP");
+
+	grid->Add(pvp, 1, wxEXPAND | wxALL);
 	grid->Add(playerChoiceButton, 1, wxEXPAND | wxALL);
 	grid->Add(ComputerChoiceButton, 1, wxEXPAND | wxALL);
+	
+	
 	playerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	ComputerChoiceButton->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
+	pvp->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &cMain::OnButtonClicked, this);
 	/* Dodane na potrzebe wyboru playera */
 
 	/*Tworzymy tutaj przycisk do inkrementacji glebokosci*/
@@ -406,65 +405,69 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 	
 
 
-	else if ((evt.GetId() == 3 || evt.GetId() == 4) && (isThisChoice == 0 || isThisChoice == 1))
+	else if ((evt.GetId() == 3 || evt.GetId() == 4 || evt.GetId() == 6) && (isThisChoice == 0))
 	{
-		if (isThisChoice == 0)
+		if (!(evt.GetId() == 6)) // Jesli nie wybralismy pvp
 		{
 			if (evt.GetId() == 3) // Wybraliœmy Playera
 			{
 				tempPlayer[0] = Player::player;
+				tempPlayer[1] = Player::computer;
 			}
 			else // Wybraliœmy komputer
-				tempPlayer[0] = Player::computer;
-
-			isThisChoice++;
-		}
-		else
-		{
-			if (evt.GetId() == 3) // Wybraliœmy Playera
 			{
+				tempPlayer[0] = Player::computer;
 				tempPlayer[1] = Player::player;
 			}
-			else // Wybraliœmy komputer
-				tempPlayer[1] = Player::computer;
-
+				
 			isThisChoice++;
-			
-			/*Ogarnaimy przyciski*/
-			playerChoiceButton->Enable(false);
-			playerChoiceButton->SetBackgroundColour("Grey");
-			playerChoiceButton->SetLabel("");
-			ComputerChoiceButton->Enable(false);
-			ComputerChoiceButton->SetBackgroundColour("Grey");
-			ComputerChoiceButton->SetLabel("");
-
-			/*Zaczynamy gre*/
-
-			// Czêœæ odpowiedzialna za pocz¹tkowe uruchomienie gry
-
-			getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
-			recordTable->getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
-
-
-			blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
-			whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
-			//nextPlayer();
-
-			recordTable->makeProposalFor();
-			makeProposalFor();
-			
-			if (player[whoseMove] == Player::computer) // Jesli zaczyna komputer
-			{
-				makeComputerMove();
-			}
-
-			
 		}
-		
+		else if (evt.GetId() == 6)
+		{
+			tempPlayer[0] = Player::player;
+			tempPlayer[1] = Player::player;
+			isThisChoice++;
+		}
+			
+		/*Ogarnaimy przyciski*/
+		if (evt.GetId() == 6)
+		{
+			incrementMaxDepth->Enable(false);
+			incrementMaxDepth->SetBackgroundColour("Grey");
+			incrementMaxDepth->SetLabel("");
+		}
+		playerChoiceButton->Enable(false);
+		playerChoiceButton->SetBackgroundColour("Grey");
+		playerChoiceButton->SetLabel("");
+		ComputerChoiceButton->Enable(false);
+		ComputerChoiceButton->SetBackgroundColour("Grey");
+		pvp->Enable(false);
+		ComputerChoiceButton->SetLabel("");
+		pvp->SetBackgroundColour("Grey");
+		pvp->SetLabel("");
+
+		/*Zaczynamy gre*/
+
+		// Czêœæ odpowiedzialna za pocz¹tkowe uruchomienie gry
+
+		getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
+		recordTable->getStartConfig(tempPlayer[0].getPlayerType(), tempPlayer[1].getPlayerType());
+
+
+		blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
+		whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+		//nextPlayer();
+
+		recordTable->makeProposalFor();
+		makeProposalFor();
+			
+		if (player[whoseMove] == Player::computer) // Jesli zaczyna komputer
+		{
+			makeComputerMove();
+		}
 	}
 
-
-	else if(isThisChoice > 1) // Tutaj normalna gra
+	else if(isThisChoice > 0) // Tutaj normalna gra
 	{
 		int x = (evt.GetId() - 10000) % nFieldWidth; // Pobieram wspolrzedna x kliknietego przycisku
 		int y = (evt.GetId() - 10000) / nFieldWidth; // pobieram wspolrzedna y kliknietego przycisku
@@ -479,7 +482,6 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 
 			recordTable->makeProposalFor();
 			makeProposalFor();
-
 
 			blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
 			whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
@@ -499,10 +501,7 @@ void cMain::OnButtonClicked(wxCommandEvent &evt)
 	}
 	
 	evt.Skip();
-	
-	
 }
-
 
 void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowego
 {
@@ -536,17 +535,30 @@ void cMain::resetGame() // Funkcja resetujaca cala plansze do poziomu poczatkowe
 		}
 	blackCounterButton->SetLabel(std::to_string(player[1].getScore()));
 	whiteCounterButton->SetLabel(std::to_string(player[0].getScore()));
+	
 	playerChoiceButton->Enable(true);
 	playerChoiceButton->SetBackgroundColour("Default");
 	playerChoiceButton->SetLabel("Player");
+	
 	ComputerChoiceButton->Enable(true);
 	ComputerChoiceButton->SetBackgroundColour("Default");
 	ComputerChoiceButton->SetLabel("Computer");
+	
+	pvp->Enable(true);
+	pvp->SetBackgroundColour("Default");
+	pvp->SetLabel("PVP");
+
+	incrementMaxDepth->Enable(true);
+	incrementMaxDepth->SetBackgroundColour("Default");
+	incrementMaxDepth->SetLabel(std::to_string(recordTable->getMaxDepth()));
+
 	isThisChoice = 0;
 	/*Pierwsze wywolanie przy poczatkowym ustawieniu*/
 	whoseMove = whitePlayer;
 	delete recordTable;
 	recordTable = new Table; // Tworzymy nowa tablice
+
+	player[whoseMove] = Player::player;
 }
 
 void cMain::makeComputerMove()
